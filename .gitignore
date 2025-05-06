@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg-info/
+
+# Virtual env
+venv/
+.env
+
+# Jupyter
+.ipynb_checkpoints
+
+# VSCode
+.vscode/
+
+# Mac
+.DS_Store
+
+# Flask
+instance/
+*.db
+
+# Model weights
+*.pt
+*.pth
+
+# Results
+app/static/results/
+
+# Uploads (optional, если не хочешь хранить загруженные картинки)
+app/static/uploads/
+
+# Logs
+*.log
+
+# System
+Thumbs.db 

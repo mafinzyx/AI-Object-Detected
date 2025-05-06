@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Object Detection</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-4xl font-bold text-center mb-8 text-gray-800">Image Object Detection</h1>
+        
+        <div class="max-w-2xl mx-auto bg-white rounded-lg shadow-md p-6">
+            <!-- Upload Section -->
+            <div class="mb-8">
+                <h2 class="text-2xl font-semibold mb-4">Upload Image</h2>
+                <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                    <input type="file" id="imageInput" accept="image/*" class="hidden">
+                    <label for="imageInput" class="cursor-pointer">
+                        <div class="text-gray-600">
+                            <svg class="mx-auto h-12 w-12" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                                <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                            <p class="mt-2">Click to upload an image</p>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Results Section -->
+            <div id="results" class="hidden">
+                <h2 class="text-2xl font-semibold mb-4">Detected Objects</h2>
+                <div id="objectList" class="mb-4 flex flex-wrap gap-2"></div>
+                
+                <div class="mb-4">
+                    <label for="objectQuery" class="block text-sm font-medium text-gray-700">Search for an object:</label>
+                    <input type="text" id="objectQuery" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <h3 class="text-lg font-medium mb-2">Original Image</h3>
+                        <img id="originalImage" class="w-full rounded-lg shadow" alt="Original">
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-medium mb-2">Highlighted Object</h3>
+                        <img id="highlightedImage" class="w-full rounded-lg shadow" alt="Highlighted">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentImage = null;
+        let currentFilename = null;
+
+        document.getElementById('imageInput').addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+
+                if (response.ok) {
+                    currentFilename = data.filename;
+                    currentImage = URL.createObjectURL(file);
+                    
+                    // Display original image
+                    document.getElementById('originalImage').src = currentImage;
+                    
+                    // Display detected objects
+                    const objectList = document.getElementById('objectList');
+                    objectList.innerHTML = '';
+                    data.objects.forEach(obj => {
+                        const button = document.createElement('button');
+                        button.className = 'px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700';
+                        button.textContent = obj;
+                        button.onclick = () => highlightObject(obj);
+                        objectList.appendChild(button);
+                    });
+
+                    // Show results section
+                    document.getElementById('results').classList.remove('hidden');
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            } catch (error) {
+                alert('Error uploading image: ' + error.message);
+            }
+        });
+
+        document.getElementById('objectQuery').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                const query = e.target.value.trim();
+                if (query) {
+                    highlightObject(query);
+                }
+            }
+        });
+
+        async function highlightObject(objectName) {
+            if (!currentFilename) return;
+
+            try {
+                const response = await fetch('/highlight', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        filename: currentFilename,
+                        object_name: objectName
+                    })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    document.getElementById('highlightedImage').src = data.image_url + '?t=' + new Date().getTime();
+                } else {
+                    const data = await response.json();
+                    alert('Error: ' + data.error);
+                }
+            } catch (error) {
+                alert('Error highlighting object: ' + error.message);
+            }
+        }
+    </script>
+</body>
+</html> 
