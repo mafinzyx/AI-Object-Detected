@@ -47,6 +47,13 @@
                         <img id="highlightedImage" class="w-full rounded-lg shadow" alt="Highlighted">
                     </div>
                 </div>
+
+                <div style="margin-top: 20px;">
+                    <label for="questionInput"><b>Ask a question about the image:</b></label>
+                    <input id="questionInput" type="text" placeholder="E.g. How many cars? What color is the sky?" style="width: 70%; margin: 10px 0;">
+                    <button id="askBtn">Ask</button>
+                    <div id="answerBox" style="margin-top: 10px; font-weight: bold;"></div>
+                </div>
             </div>
         </div>
     </div>
@@ -132,6 +139,29 @@
                 alert('Error highlighting object: ' + error.message);
             }
         }
+
+        document.getElementById('askBtn').onclick = async function() {
+            const question = document.getElementById('questionInput').value;
+            const filename = currentFilename;
+            if (!question || !filename) {
+                document.getElementById('answerBox').innerText = 'Please upload an image and enter a question.';
+                return;
+            }
+            document.getElementById('answerBox').innerText = 'Processing...';
+            const response = await fetch('/ask', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ filename, question })
+            });
+            const data = await response.json();
+            if (data.answer) {
+                document.getElementById('answerBox').innerText = data.answer;
+            } else if (data.error) {
+                document.getElementById('answerBox').innerText = 'Error: ' + data.error;
+            } else {
+                document.getElementById('answerBox').innerText = 'No answer received.';
+            }
+        };
     </script>
 </body>
 </html> 

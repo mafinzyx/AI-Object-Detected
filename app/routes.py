@@ -72,4 +72,39 @@ def highlight_object():
             return jsonify({'error': f"Object '{object_name}' not found"}), 404
     except Exception as e:
         print(f"[highlight] Internal error: {e}")
-        return jsonify({'error': 'Internal server error', 'details': str(e)}), 500 
+        return jsonify({'error': 'Internal server error', 'details': str(e)}), 500
+
+@main.route('/ask', methods=['POST'])
+def ask_question():
+    data = request.json
+    if not data or 'filename' not in data or 'question' not in data:
+        return jsonify({'error': 'Missing required parameters'}), 400
+    
+    filename = data['filename']
+    question = data['question']
+    filepath = os.path.join(UPLOAD_FOLDER, filename)
+    
+    if not os.path.exists(filepath):
+        return jsonify({'error': 'File not found'}), 404
+    
+    try:
+        # Check if it's a counting question
+        if "how many" in question.lower() and "are there" in question.lower():
+            # Extract object name from question
+            # Example: "how many cars are there" -> "car"
+            words = question.lower().split()
+            try:
+                object_index = words.index("many") + 1
+                object_name = words[object_index]
+                count = image_processor.count_objects(filepath, object_name)
+                return jsonify({'answer': f"There are {count} {object_name}(s) in the image."})
+            except (ValueError, IndexError):
+                pass
+        
+        # If not a counting question or counting failed, use BLIP-2
+        answer = image_processor.answer_question(filepath, question)
+        return jsonify({'answer': answer})
+        
+    except Exception as e:
+        print(f"[ask] Error processing question: {e}")
+        return jsonify({'error': 'Error processing question', 'details': str(e)}), 500 
