@@ -1,4 +1,7 @@
 # Image Object Detection Web Application
+### 🔗 **Contributors**
+
+[![GitHub - Danylo Zherzdiev](https://img.shields.io/badge/GitHub-Danylo_Zherzdiev-181717?style=for-the-badge&logo=github)](https://github.com/mafinzyx)   [![GitHub - Danylo Lohachov](https://img.shields.io/badge/GitHub-Danylo_Lohachov-181717?style=for-the-badge&logo=github)](https://github.com/eternaki) [![GitHub - Evelina Rylova](https://img.shields.io/badge/GitHub-Evelina_Rylova-181717?style=for-the-badge&logo=github)](https://github.com/peachwat) [![GitHub - Maria Volkova](https://img.shields.io/badge/GitHub-Maria_Volkova-181717?style=for-the-badge&logo=github)](https://github.com/mvollkova)
 
 A web application that uses YOLOv8 for object detection in images. Users can upload images and get real-time object detection results with the ability to highlight specific objects.
 
@@ -28,7 +31,7 @@ pip install -r requirements.txt
 python run.py
 ```
 
-4. Open your browser and navigate to `http://localhost:5000`
+4. Open your browser and navigate to `http://localhost:xxxx`
 
 ## Usage
 
